@@ -1,0 +1,24 @@
+/* watchlist.css */
+
+.watchlist-container {
+    background-color: #f2f2f2;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .watchlist-table {
+    margin: 0 auto;
+    width: 80%;
+  }
+  
+  .watchlist table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .watchlist th,
+  .watchlist td {
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+  

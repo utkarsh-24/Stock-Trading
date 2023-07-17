@@ -1,0 +1,43 @@
+/* Add CSS styles to make the dashboard attractive */
+.dashboard-container {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f2f2f2;
+    border-radius: 8px;
+  }
+  
+  .top-20-stocks table,
+  .search-bar table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .top-20-stocks th,
+  .top-20-stocks td,
+  .search-bar th,
+  .search-bar td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .top-20-stocks th:first-child,
+  .top-20-stocks td:first-child,
+  .search-bar th:first-child,
+  .search-bar td:first-child {
+    width: 20%;
+  }
+  
+  .search-bar input {
+    padding: 8px;
+    width: 200px;
+    margin-right: 10px;
+  }
+  
+  .search-bar table {
+    margin-top: 10px;
+  }
+  
+  /* Customize other styles as per your requirements */
+  
