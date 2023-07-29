@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import ErrorHandler from "../middleware/errorhandler";
 import watchlist from "../services/watchlist";
-import { UserEntity } from "../Entities/UserEntities";
+import { UserEntity } from "../Entities/UserEntity";
 import { CustomRequestEntity } from "../Entities/RequestEntity";
 import { ObjectId } from "mongoose";
 import logger from "../logger";

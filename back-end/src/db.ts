@@ -9,7 +9,7 @@ const db = async () => {
             logger.info("DB connected successfully");
         })
         .catch((err) => {
-            console.log(err)
+            console.error(err)
             logger.error("Trouble in connecting to DB");
             logger.error(err)
             process.exit(1);

@@ -9,16 +9,16 @@ const setupEnv = () => {
     dotenv.config();
     if(NODE_ENV=="development")
     {
-        if(fs.existsSync(path.join(envPath,"development.env")))
+        if(fs.existsSync(path.join(envPath,".env.development.local")))
         {
-            dotenv.config({path:path.join(envPath,"development.env"),override:true})
+            dotenv.config({path:path.join(envPath,".env.development.local"),override:true})
         }
     }
     if(NODE_ENV == "production")
     {
-        if(fs.existsSync(path.join(envPath,"production.env")))
+        if(fs.existsSync(path.join(envPath,".env.production.local")))
         {
-            dotenv.config({path:path.join(envPath,"production.env"),override:true})
+            dotenv.config({path:path.join(envPath,".env.production.local"),override:true})
         }
     }
 }
@@ -26,7 +26,5 @@ const setupEnv = () => {
 setupEnv();
 
 const PORT = process.env.PORT ?? "3000";
-
-
 
 export { PORT }

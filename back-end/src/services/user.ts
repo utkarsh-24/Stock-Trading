@@ -1,23 +1,13 @@
 import ErrorHandler from "../middleware/errorhandler"
-import User, { IUser } from "../Models/User"
+import User from "../Models/User"
 import jwt from "jsonwebtoken"
 import path from "path"
 import fs from "fs"
 import { ObjectId } from 'mongodb';
-
-interface UserTokenDetails {
-    userId: string;
-    name: String;
-}
-
-interface UserLogin {
-    email: string,
-    password: string
-}
+import { UserEntity, UserLoginEntity, UserTokenEntity } from "../Entities/UserEntity"
 
 
-
-const addUser = async (data: IUser) => {
+const addUser = async (data: UserEntity) => {
     const { email } = data;
     let user = await User.findOne({ email });
     if (user) {
@@ -30,12 +20,12 @@ const addUser = async (data: IUser) => {
 }
 
 
-const login = async (body: UserLogin) => {
+const login = async (body: UserLoginEntity) => {
     const { email, password } = body
     const user = await User.findOne({ email })
     if (user) {
         if (user.password == password) {
-            let token = generateUserToken({ name: user.name, userId: user._id as string })
+            let token = generateUserToken({ name: user.name, userId: user._id as unknown as string })
             return { success: true, message: "successfully logined", token: token }
         }
         throw new ErrorHandler("Incorrect password", 400)
@@ -44,7 +34,7 @@ const login = async (body: UserLogin) => {
     }
 }
 
-const generateUserToken = (details: UserTokenDetails): string => {
+const generateUserToken = (details: UserTokenEntity): string => {
     const privateKeyPath = path.join(__dirname, "../keys/private.key.pem");
     const privateKeyPem = fs.readFileSync(privateKeyPath, 'utf8');
     const token = jwt.sign(details, privateKeyPem, { algorithm: 'RS256' });

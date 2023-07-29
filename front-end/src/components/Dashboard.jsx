@@ -1,33 +1,14 @@
-import React, { useEffect, useState } from "react";
 import axios from "axios";
-import SearchBar from './SearchBar';
-import StockTable from './StockTable';
-import Watchlist from './WatchList';
-import "../styles/Dashboard.css"
+import Table from "./Table";
+import "../styles/Dashboard.css";
+import React, { useEffect, useState } from "react";
 
-const Dashboard = () => {
+function Dashboard() {
   const [stocks, setStocks] = useState([]);
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [matchingStocks, setMatchingStocks] = useState([]);
-  const [watchlist, setWatchlist] = useState([]);
-
-  useEffect(() => {
-    // Fetch top 20 stocks on component mount
-    fetchTop20Stocks();
-    getWatchListFromUser();
-  }, []);
-
-  useEffect(() => {
-    // Filter matching stocks when a key is typed in the search box
-    if (searchKeyword.trim() !== "") {
-      const filteredStocks = stocks.filter((stock) =>
-        stock.symbol.toLowerCase().includes(searchKeyword.toLowerCase())
-      );
-      setMatchingStocks(filteredStocks);
-    } else {
-      setMatchingStocks([]);
-    }
-  }, [searchKeyword, stocks]);
+  const [watchListStocks, setWatchListStocks] = useState([]);
+  const [watchListStocksNames, setWatchListStocksNames] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStocks, setFilteredStocks] = useState([]);
 
   const fetchTop20Stocks = async () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -42,19 +23,19 @@ const Dashboard = () => {
         }
       );
       setStocks(response.data.splice(0, 20));
+      await getWatchListFromUser(response.data.splice(0, 20));
     } catch (error) {
       console.error(error);
-      if (error.response && error.response.status === 401) {
-        navigate("/");
-      }
+        window.location.href = "/login"      
     }
   };
 
-  const addToWatchlist = async (stock) => {
+  const addToWatchlist = async (stockName) => {
+    const foundStock = stocks.find((stock) => stock.symbol === stockName);
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const bearer = urlParams.get("bearer");
-      const symbol = stock.symbol;
+      const symbol = foundStock.symbol;
       await axios.post(
         process.env.REACT_APP_API_URL + "watchlist",
         {
@@ -66,31 +47,46 @@ const Dashboard = () => {
           },
         }
       );
-      setWatchlist([...watchlist, stock]);
+      setWatchListStocks([...watchListStocks, foundStock]);
+      setWatchListStocksNames([...watchListStocksNames, stockName]);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const removeFromWatchlist = async (stock) => {
+  const removeFromWatchlist = async (stockName) => {
+    const indexToRemove = watchListStocks.findIndex(
+      (stock) => stock.symbol === stockName
+    );
+    const foundStock = stocks.find((stock) => stock.symbol === stockName);
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const bearer = urlParams.get("bearer");
-      const symbol = stock.symbol;
+      const symbol = foundStock.symbol;
       await axios.delete(process.env.REACT_APP_API_URL + "watchlist", {
         data: { stockName: symbol },
         headers: {
           Authorization: `Bearer ${bearer}`,
         },
       });
-      const updatedWatchlist = watchlist.filter((item) => item !== symbol);
-      setWatchlist(updatedWatchlist);
+      if (indexToRemove !== -1) {
+        setWatchListStocks((watchListStocks) => {
+          const updatedWatchListStocks = [
+            ...watchListStocks.slice(0, indexToRemove),
+            ...watchListStocks.slice(indexToRemove + 1),
+          ];
+          return updatedWatchListStocks;
+        });
+        setWatchListStocksNames((watchListStocksNames) =>
+          watchListStocksNames.filter((name) => name !== stockName)
+        );
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
-  const getWatchListFromUser = async () => {
+  const getWatchListFromUser = async (fetchedStocks) => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const bearer = urlParams.get("bearer");
@@ -103,11 +99,7 @@ const Dashboard = () => {
         }
       );
       if (response.data.success) {
-        const watchlistStocks = response.data.data;
-        const filteredStocks = stocks.filter((stock) =>
-          watchlistStocks.includes(stock.symbol)
-        );
-        setWatchlist(filteredStocks);
+        setWatchListStocksNames(response.data.data);
       } else {
         return [];
       }
@@ -116,33 +108,60 @@ const Dashboard = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    setSearchKeyword(e.target.value);
-  };    
-  
+  useEffect(() => {
+    if (watchListStocksNames.length > 0) {
+      const filteredStocks = stocks.filter((stock) =>
+        watchListStocksNames.includes(stock.symbol)
+      );
+      setWatchListStocks(filteredStocks);
+    }
+  }, [watchListStocksNames, stocks]);
+
+  useEffect(() => {
+    fetchTop20Stocks();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredStocks([]);
+    } else {
+      const filteredStocks = stocks.filter((stock) =>
+        stock.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredStocks(filteredStocks);
+    }
+  }, [searchQuery, stocks]);
+
   return (
-    <div>
-      <SearchBar searchKeyword={searchKeyword} handleSearch={handleSearch} />
-      {matchingStocks.length > 0 && (
-        <StockTable
-          stocks={matchingStocks}
-          watchlist={watchlist}
-          addToWatchlist={addToWatchlist}
-          removeFromWatchlist={removeFromWatchlist}
-        />
-      )}
-      <Watchlist watchlist={watchlist} />
-      <div className="top-20-stocks">
-        <h2>Top 20 Stocks</h2>
-        <StockTable
+    <div className="Dashboard">
+      <div className="wrapper">
+        <div className="search-table">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Table
+            stocks={filteredStocks}
+            action={true}
+            addStockToWatchList={addToWatchlist}
+            removeStockFromWatchList={removeFromWatchlist}
+            watchListStocksNames={watchListStocksNames}
+          />
+        </div>
+        <Table stocks={watchListStocks} action={false} color={"green"} />
+        <Table
           stocks={stocks}
-          watchlist={watchlist}
-          addToWatchlist={addToWatchlist}
-          removeFromWatchlist={removeFromWatchlist}
+          action={true}
+          addStockToWatchList={addToWatchlist}
+          removeStockFromWatchList={removeFromWatchlist}
+          watchListStocksNames={watchListStocksNames}
+          color={"blue"}
         />
       </div>
     </div>
   );
-};
+}
 
 export default Dashboard;

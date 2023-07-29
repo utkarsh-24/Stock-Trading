@@ -1,6 +1,6 @@
-import { UserEntity } from "./UserEntities";
+import { UserEntity } from "./UserEntity";
 import { Request } from "express";
 
 export interface CustomRequestEntity extends Request {
-    user?: UserEntity; // Define the `user` property on the custom Request type
+    user?: UserEntity;
 }

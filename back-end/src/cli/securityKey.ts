@@ -10,14 +10,11 @@ const generateKeys = () => {
     if (!fs.existsSync(keysFolderPath)) {
         fs.mkdirSync(keysFolderPath);
     }
-
     // Generate key pair
     const { privateKey, publicKey } = forge.pki.rsa.generateKeyPair({ bits: 2048 });
-
     // Convert keys to PEM format
     const privateKeyPem = forge.pki.privateKeyToPem(privateKey);
     const publicKeyPem = forge.pki.publicKeyToPem(publicKey);
-
     // Save private and public keys to files
     fs.writeFileSync(`${keysFolderPath}/${privateKeyFilename}`, privateKeyPem);
     fs.writeFileSync(`${keysFolderPath}/${publicKeyFilename}`, publicKeyPem);

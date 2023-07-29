@@ -33,13 +33,4 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
-const watchlistAdd = async (req: Request, res: Response, next: NextFunction) => {
-    const { stockName } = req.body
-    return res.send(stockName)
-}
-
-const watchlistDelete = async (req: Request, res: Response, next: NextFunction) => {
-
-}
-
-export default { login, signup, watchlistDelete, watchlistAdd }
+export default { login, signup }
